@@ -38,3 +38,18 @@ exports.register = async (req, res, next) => {
     await register(user, password);
     next();
 }
+
+exports.account = (req, res) => res.render('account', { title: 'Edit your account' });
+
+exports.updateAccount = async (req, res) => {
+    const { name, email } = req.body;
+    const updates = { name, email};
+    await User.findOneAndUpdate(
+        { _id: req.user._id },
+        { $set: updates },
+        { new: true, runValidators: true, context: 'query' }
+    );
+
+    req.flash('success', 'Profile update successful');
+    res.redirect('back');
+}
