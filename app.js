@@ -1,3 +1,5 @@
+require('./handlers/passport');
+
 const express = require('express');
 const session = require('express-session');
 const mongoose = require('mongoose');
@@ -12,6 +14,7 @@ const expressValidator = require('express-validator');
 const routes = require('./routes/index');
 const helpers = require('./helpers');
 const errorHandlers = require('./handlers/errorHandlers');
+
 
 // create our Express app
 const app = express();
