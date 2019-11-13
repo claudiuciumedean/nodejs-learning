@@ -3,7 +3,7 @@ const router = express.Router();
 const { catchErrors } = require('../handlers/errorHandlers');
 const { addStore, createStore, getStores, editStore, 
         updateStore, upload, resize, getStoreBySlug, 
-        getStoresByTag } = require('../controllers/storeController');
+        getStoresByTag, searchStores } = require('../controllers/storeController');
 const { loginForm, registerForm, validateRegister, 
         register, account, updateAccount } = require('../controllers/userController');
 const { login, logout, isLoggedIn, forgot, reset, confirmedPasswords, update } = require('../controllers/authController');
@@ -34,5 +34,7 @@ router.post('/account', catchErrors(updateAccount));
 router.post('/account/forgot', catchErrors(forgot));
 router.get('/account/reset/:token', catchErrors(reset));
 router.post('/account/reset/:token', confirmedPasswords, catchErrors(update));
+
+router.get('/api/search', catchErrors(searchStores));
 
 module.exports = router;

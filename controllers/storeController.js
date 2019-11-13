@@ -18,7 +18,9 @@ const multerOptions = {
 exports.addStore = (req, res) => res.render('editStore', { title: 'Add Store' });
 
 exports.createStore = async (req, res) => {
+    req.body.author = req.user._id;
     const store = await (new Store(req.body)).save();
+
     req.flash('success', `Successfully creted ${store.name}`);
     res.redirect(`/store/${store.slug}`);
 }
@@ -28,8 +30,16 @@ exports.getStores = async (req, res) => {
     res.render('stores', { title: 'Stores', stores });
 }
 
+const confirmOwner = (store, user) => {
+    if(!store || !user || !store.author.equals(user._id)) {
+        throw Error('You must own a store in order to edit it!')
+    }
+}
+
 exports.editStore = async (req, res) => {
     const store = await Store.findOne({ _id: req.params.id });
+    confirmOwner(store, req.user);
+
     res.render('editStore', { title: `Edit Store ${store.name}`,  store});
 }
 
@@ -61,7 +71,7 @@ exports.resize = async (req, res, next) => {
 }
 
 exports.getStoreBySlug = async (req, res, next) => {
-    const store = await Store.findOne({ slug: req.params.slug });
+    const store = await Store.findOne({ slug: req.params.slug }).populate('author');
     if(!store) { return next(); }
 
     res.render('store', { store, title: store.name });
@@ -76,4 +86,20 @@ exports.getStoresByTag = async (req, res) => {
     const [tags, stores] = await Promise.all([tagsPromise, storesPromise]);
 
     res.render('tag', { tags, title: 'Tags', tag, stores });
+}
+
+exports.searchStores  = async (req, res) => {
+    const stores = await Store
+    .find({
+        $text: {
+            $search: req.query.q
+        } 
+    }, {
+        score: { $meta: 'textScore' }
+    })
+    .sort({
+        score: { $meta: 'textScore' }
+    }).limit(5);
+
+    res.json(stores);
 }
